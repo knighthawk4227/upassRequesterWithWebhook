@@ -7,7 +7,7 @@ from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import Select
 import os
 from dotenv import load_dotenv
-from webhook import *
+from schoolButton import *
 import time
 
 url = 'https://upassbc.translink.ca/'
@@ -16,7 +16,7 @@ service = Service(executable_path=path)
 firefox_options = Options()
 load_dotenv()
 #Below is for headless running end product I will activate this.
-# firefox_options.add_argument("--headless")
+firefox_options.add_argument("--headless")
 
 instock = False
 
@@ -27,7 +27,7 @@ try:
 
     time.sleep(3)
 
-    #Buttons for Upass site
+    #Buttons for Upass site itself
     selectSchoolButton  = '//select[contains(@class, "select-css")]'  
     postSecondaryButton = f'//option[contains(@value, "{os.getenv("SCHOOL_VALUE")}")]'
     nextPageButton      = '//input[contains(@id, "goButton")]'
@@ -56,6 +56,7 @@ try:
     ## This has to be below cause we need to wait to look for thsi till after the redirect
     ## I assume I could turn this into another file or function which I might do later
     time.sleep(3)
+    ## Bcit login page
     bcitLoginInputField = '//input[contains(@type, "email")]'
     bcitNextButton      = '//input[contains(@type, "submit")]'
     bcitPasswordField   = '//input[contains(@type, "password")]'
@@ -81,6 +82,7 @@ try:
     ## and crashes depending on internet connection change this
     time.sleep(2)
 
+    ## Bcit login Page
     bcitSignInButton      = '//input[contains(@id, "idSIButton9")]'
     findBcitSignInButton  = driver.find_element(
         By.XPATH,
@@ -92,21 +94,15 @@ try:
     ## and crashes depending on internet connection change this
     time.sleep(2)
 
-    microsoftAuthCode     = '//div[contains(@tabindex, "0")]'
-    findMicrosoftAuthCode = driver.find_element(
-        By.XPATH,
-        microsoftAuthCode
-    )
-
-
-    upass_auth_request_message(findMicrosoftAuthCode.text)
+    ## Microsoft Auth code section.
+    checkCodeHandle(driver)
 
     print("Page Auth Yes button")
 
     try:
         current_url = driver.current_url
         WebDriverWait(driver, 60).until(
-            expected_conditions.url_changes(current_url)
+            expected_conditions.url_contains("login")
         )
         bcitStaySignedInButton     = '//input[contains(@id, "idSIButton9")]'
         findBcitStaySignInButton   = driver.find_element(
@@ -117,13 +113,12 @@ try:
         time.sleep(2)
         findBcitStaySignInButton.click()
     except:
-        print("Timed out took too long")
+        print("Timed out took too long or couldn't find button")
 
 
 
     try:
         upassRequestButton = '//input[contains(@id, "requestButton")]'
-
         findUpassRequestButton = driver.find_element(
             By.XPATH,
             upassRequestButton
@@ -134,47 +129,13 @@ try:
         monthAlreadyRequested()
 
 
-
-
-
-
-
-    ##### All below are examples from another scraper for me to reference so I do not have to keep 
-    ##### going back and fourth. 
-    #The 3 below are the xpaths to find product info 
-    # productPath = '//div[contains(@class, "VvwZmAlF0uXfe__ZO0uX0")]'
-    # steamDeckPath = '//div[contains(@class, "_1e4No10_bpJEyqWGdzhAs9")]'
-    # steamDeckAvailability = "//div[contains(@class, '_3gb3JeV_1IMaIeODzBSrP3')]//span[contains(., 'stock')]"
-    # #These are the variables that hold all found elements in found items in a list/ variable 
-    # steamDeck = driver.find_elements(By.XPATH , steamDeckPath)
-    # steamDeckStock = driver.find_elements(By.XPATH , steamDeckAvailability)
-
-    # steamDeckList = ['Steam Deck 512 GB OLED - Valve Certified Refurbished',
-    # 'Steam Deck 1TB OLED - Valve Certified Refurbished',
-    # 'Steam Deck 64 GB LCD - Valve Certified Refurbished',
-    # 'Steam Deck 256 GB LCD - Valve Certified Refurbished',
-    # 'Steam Deck 512 GB LCD - Valve Certified Refurbished']
-    # count = 0
-
-    # #self explanatory prints out information
-    # for element in steamDeckStock: 
-    #     print(element.text.lower())
-    #     print(steamDeckList[count])
-    #     if element.text.lower() == 'add to cart':
-    #         instock = True
-    #         print('yes', steamDeckList[count])
-    #     if count < 4:
-    #         count += 1
-    
-    # if instock == True:
-    #     count
-        #do webhook stuff
 finally:
     print("Done the whole thing")
-    # if driver:
-    #     try:
-    #         driver.quit()
-    #     except Exception as e:
-    #         print("Could not close window properly")
+    if driver:
+        try:
+            driver.quit()
+            print("Driver has been quit")
+        except Exception as e:
+            print("Could not close window properly")
 
     
