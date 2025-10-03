@@ -21,4 +21,8 @@ def verifyIdentity():
         By.XPATH,
         verifyButton
     )
+
+
+
+##/todo Make function to check if cookies are found then just press sign in button.
     
