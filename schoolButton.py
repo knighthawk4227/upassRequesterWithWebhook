@@ -28,16 +28,26 @@ firefox_options = Options()
 ##/checks is there is a code if not just prints that there is not one and moves on 
 
 def checkCodeHandle(driver):
-    microsoftAuthCode     = '//div[contains(@tabindex, "0")]'
+    microsoftAuthCode = '//div[contains(@tabindex, "0")]'
+    passwordError     = '//div[contains(@id, "passwordError")]'
     try:
         findMicrosoftAuthCode = driver.find_element(
             By.XPATH,
             microsoftAuthCode
         )
         upass_auth_request_message(findMicrosoftAuthCode.text)
-    except:
-        print("Looks like cookies are found Going to request page")
-        noAuthRequired()
+    except: 
+        try:
+            driver.find_element(
+            By.XPATH,
+            passwordError
+            )
+            ### if we find this element then we bad throw exception
+            raise Exception("Authentication Password failed")
+        except:
+            print("Looks like cookies are found Going to request page")
+            noAuthRequired()
+
 
 
 
